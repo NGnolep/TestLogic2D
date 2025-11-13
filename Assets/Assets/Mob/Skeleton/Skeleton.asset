@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Skeleton
   m_EditorClassIdentifier: 
   enemyName: Skeleton
-  enemyPrefab: {fileID: 0}
+  enemyPrefab: {fileID: 5896701423636077564, guid: 0e0eace9ca4042547b48d4d060506e07, type: 3}
   baseHP: 100
   baseDamage: 10

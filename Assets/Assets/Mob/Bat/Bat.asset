@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Bat
   m_EditorClassIdentifier: 
   enemyName: Bat
-  enemyPrefab: {fileID: 0}
+  enemyPrefab: {fileID: 2689421060474980703, guid: 3e8e98a4abda912449d48b5b25b0b403, type: 3}
   baseHP: 100
   baseDamage: 10

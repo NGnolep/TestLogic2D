@@ -9,10 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ed68d8b2fe9138419f1e18b500cb730, type: 3}
-  m_Name: Orc
+  m_Script: {fileID: 11500000, guid: 2a25e573be1157a4197f85523aa3e17b, type: 3}
+  m_Name: PlayerData
   m_EditorClassIdentifier: 
-  enemyName: Orc
-  enemyPrefab: {fileID: 3188785606721288067, guid: ab30a720f91e1184daadb1290cae8715, type: 3}
-  baseHP: 100
+  maxHP: 100
   baseDamage: 10

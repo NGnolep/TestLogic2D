@@ -100,10 +100,10 @@ TextureImporter:
       name: IDLE_0
       rect:
         serializedVersion: 2
-        x: 34
-        y: 22
-        width: 26
-        height: 37
+        x: 0
+        y: 0
+        width: 96
+        height: 84
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -121,10 +121,10 @@ TextureImporter:
       name: IDLE_1
       rect:
         serializedVersion: 2
-        x: 127
-        y: 22
-        width: 29
-        height: 36
+        x: 96
+        y: 0
+        width: 96
+        height: 84
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -142,10 +142,10 @@ TextureImporter:
       name: IDLE_2
       rect:
         serializedVersion: 2
-        x: 221
-        y: 22
-        width: 31
-        height: 35
+        x: 192
+        y: 0
+        width: 96
+        height: 84
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -163,10 +163,10 @@ TextureImporter:
       name: IDLE_3
       rect:
         serializedVersion: 2
-        x: 316
-        y: 22
-        width: 32
-        height: 34
+        x: 288
+        y: 0
+        width: 96
+        height: 84
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -184,10 +184,10 @@ TextureImporter:
       name: IDLE_4
       rect:
         serializedVersion: 2
-        x: 414
-        y: 22
-        width: 30
-        height: 34
+        x: 384
+        y: 0
+        width: 96
+        height: 84
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -205,10 +205,10 @@ TextureImporter:
       name: IDLE_5
       rect:
         serializedVersion: 2
-        x: 512
-        y: 22
-        width: 28
-        height: 35
+        x: 480
+        y: 0
+        width: 96
+        height: 84
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -226,10 +226,10 @@ TextureImporter:
       name: IDLE_6
       rect:
         serializedVersion: 2
-        x: 612
-        y: 22
-        width: 24
-        height: 36
+        x: 576
+        y: 0
+        width: 96
+        height: 84
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,8 +237,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5ff8508f94da28b4a8d4a3c2082614fc
-      internalID: 657270826
+      spriteID: 4ccf4d0a1253c1b47a651ebcc61b557a
+      internalID: 125413906
       vertices: []
       indices: 
       edges: []
@@ -260,7 +260,7 @@ TextureImporter:
       IDLE_3: 188376777
       IDLE_4: -900365505
       IDLE_5: -207502733
-      IDLE_6: 657270826
+      IDLE_6: 125413906
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -13,11 +13,21 @@ public class EnemySpawner : MonoBehaviour
     private GameObject enemyPrefab;
 
     private EnemyBattle currentEnemy;
-    
+
     public RPSManager battleManager;
+    public TMP_Text roundText;
+    public TMP_Text scoreText;
+
+    public GameObject startPopup;         
+    public TMP_Text startPopupText;        
+    public float startPopupDuration = 1.5f;
+    private int currentWave = 0;
+    private int currentScore = 0;
 
     void Start()
     {
+        UpdateRoundText();
+        UpdateScoreText();
         StartCoroutine(SpawnEnemyRoutine());
     }
 
@@ -29,7 +39,8 @@ public class EnemySpawner : MonoBehaviour
             Debug.LogWarning("No enemies in database!");
             yield break;
         }
-
+        currentWave++;
+        UpdateRoundText();
         GameObject enemyObj = Instantiate(randomEnemy.enemyPrefab, spawnPoint.position, Quaternion.identity);
         currentEnemy = enemyObj.GetComponent<EnemyBattle>();
 
@@ -38,12 +49,13 @@ public class EnemySpawner : MonoBehaviour
 
         Slider hpSlider = GameObject.Find("EnemyHP")?.GetComponent<Slider>();
         TMP_Text hpText = GameObject.Find("EnemyHPText")?.GetComponent<TMP_Text>();
+        TMP_Text nameText = GameObject.Find("EnemyNameText")?.GetComponent<TMP_Text>();
 
         if (hpSlider != null && hpText != null)
         {
             currentEnemy.hpSlider = hpSlider;
             currentEnemy.hpText = hpText;
-
+            currentEnemy.mobName = nameText;
         }
         else
         {
@@ -69,6 +81,7 @@ public class EnemySpawner : MonoBehaviour
         yield return StartCoroutine(MoveToPosition(enemyObj.transform, battlePoint.position));
 
         Debug.Log("Enemy reached battle point — wave start!");
+        StartCoroutine(ShowStartPopup());
 
         if (battleManager != null)
         {
@@ -78,6 +91,7 @@ public class EnemySpawner : MonoBehaviour
 
     IEnumerator MoveToPosition(Transform enemy, Vector3 target)
     {
+        EnemyAnimation anim = enemy.GetComponent<EnemyAnimation>();
         while (Vector3.Distance(enemy.position, target) > 0.1f)
         {
             enemy.position = Vector3.MoveTowards(enemy.position, target, moveSpeed * Time.deltaTime);
@@ -88,9 +102,7 @@ public class EnemySpawner : MonoBehaviour
     public void OnEnemyDefeated(EnemyBattle defeatedEnemy)
     {
         Debug.Log("Enemy defeated! Preparing next wave...");
-
-        Destroy(defeatedEnemy.gameObject);
-
+        AddScore(2000);
         StartCoroutine(NextWaveDelay(2f));
     }
 
@@ -99,5 +111,46 @@ public class EnemySpawner : MonoBehaviour
         yield return new WaitForSeconds(delay);
         StartCoroutine(SpawnEnemyRoutine());
     }
+    
+     private void AddScore(int amount)
+    {
+        currentScore += amount;
+        UpdateScoreText();
+        SaveBestScore();
+    }
 
+    private void SaveBestScore()
+    {
+        int best = PlayerPrefs.GetInt("BestScore", 0);
+
+        if (currentScore > best)
+        {
+            PlayerPrefs.SetInt("BestScore", currentScore);
+            PlayerPrefs.Save();
+        }
+    }
+    private void UpdateRoundText()
+    {
+        if (roundText != null)
+            roundText.text = $"Round: {currentWave}";
+    }
+
+    private void UpdateScoreText()
+    {
+        if (scoreText != null)
+            scoreText.text = $"Score: {currentScore}";
+    }
+
+    private IEnumerator ShowStartPopup()
+    {
+        if (startPopup == null || startPopupText == null)
+            yield break;
+
+        startPopupText.text = $"START!";
+        startPopup.SetActive(true);
+
+        yield return new WaitForSeconds(startPopupDuration);
+
+        startPopup.SetActive(false);
+    }
 }

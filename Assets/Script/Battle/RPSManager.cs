@@ -11,6 +11,12 @@ public class RPSManager : MonoBehaviour
 
     private bool roundActive = false;
 
+    public Image playerChoiceImage;
+    public Image enemyChoiceImage;
+
+    public Sprite rockSprite;
+    public Sprite paperSprite;
+    public Sprite scissorSprite;
     private void Start()
     {
         SetButtonsActive(false, true);
@@ -41,7 +47,18 @@ public class RPSManager : MonoBehaviour
     public void EnableBattleRound()
     {
         roundActive = true;
-        SetButtonsActive(true, false); // enable and undim
+        SetButtonsActive(true, false); 
+    }
+
+    public Sprite GetSpriteForChoice(RPSChoice choice)
+    {
+        switch (choice)
+        {
+            case RPSChoice.Rock: return rockSprite;
+            case RPSChoice.Paper: return paperSprite;
+            case RPSChoice.Scissors: return scissorSprite;
+        }
+        return null;
     }
     public void ResolveBattle()
     {
@@ -58,7 +75,11 @@ public class RPSManager : MonoBehaviour
 
         RPSChoice playerChoice = player.currentChoice;
         RPSChoice enemyChoice = enemy.currentChoice;
+        if (playerChoiceImage != null)
+            playerChoiceImage.sprite = GetSpriteForChoice(playerChoice);
 
+        if (enemyChoiceImage != null)
+            enemyChoiceImage.sprite = GetSpriteForChoice(enemyChoice);
         Debug.Log($"Player chose {playerChoice}, Enemy chose {enemyChoice}");
 
         if (playerChoice == enemyChoice)

@@ -100,10 +100,10 @@ TextureImporter:
       name: bat_idle_0
       rect:
         serializedVersion: 2
-        x: 31
-        y: 16
-        width: 17
-        height: 40
+        x: 0
+        y: 0
+        width: 80
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -121,10 +121,10 @@ TextureImporter:
       name: bat_idle_1
       rect:
         serializedVersion: 2
-        x: 111
-        y: 16
-        width: 17
-        height: 40
+        x: 80
+        y: 0
+        width: 80
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -142,10 +142,10 @@ TextureImporter:
       name: bat_idle_2
       rect:
         serializedVersion: 2
-        x: 191
-        y: 16
-        width: 17
-        height: 41
+        x: 160
+        y: 0
+        width: 80
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -163,10 +163,10 @@ TextureImporter:
       name: bat_idle_3
       rect:
         serializedVersion: 2
-        x: 271
-        y: 16
-        width: 17
-        height: 40
+        x: 240
+        y: 0
+        width: 80
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

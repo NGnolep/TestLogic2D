@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 public class PauseManager : MonoBehaviour
 {
     public GameObject pausePanel;
@@ -37,6 +37,9 @@ public class PauseManager : MonoBehaviour
     public void QuitButton()
     {
         Time.timeScale = 1f;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        if (FadeController.Instance != null)
+            FadeController.Instance.FadeOutAndLoad("MainMenu");
+        else
+            SceneManager.LoadScene("MainMenu");
     }
 }

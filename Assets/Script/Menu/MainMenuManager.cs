@@ -6,22 +6,11 @@ public class MainMenuManager : MonoBehaviour
 {
     public GameObject bestScorePanel;
     public GameObject optionsPanel;
-
-    public string nextSceneName = "GameScene";  
     public float fadeWait = 1f;
 
     public void PlayGame()
     {
-        StartCoroutine(FadeAndLoad());
-    }
-
-    private IEnumerator FadeAndLoad()
-    {
-        FadeController.Instance.FadeOut();
-
-        yield return new WaitForSeconds(FadeController.Instance.fadeTime);
-
-        SceneManager.LoadScene(nextSceneName);
+        FadeController.Instance.FadeOutAndLoad("GameScene");
     }
     public void OpenBestScore()
     {

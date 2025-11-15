@@ -2,33 +2,55 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 public class FadeController : MonoBehaviour
 {
     public static FadeController Instance;
-    public Animator animator;
+    public Image fadeImage;
     public float fadeTime = 1f;
 
+    private Coroutine currentFade;
     private void Awake()
     {
-        // Singleton: ensure one fade canvas across scenes
-        if (Instance == null)
+        string scene = SceneManager.GetActiveScene().name;
+
+       if (scene == "MainMenu")
         {
+            if (Instance != null && Instance != this)
+            {
+                try
+                {
+                    SceneManager.sceneLoaded -= Instance.OnSceneLoaded;
+                }
+                catch { /* ignore if already unsubscribed */ }
+
+                Destroy(Instance.gameObject);
+            }
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            Destroy(gameObject);
-            return;
+            if (Instance == null)
+            {
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+                return;
+            }
         }
 
-        if (animator == null)
-            animator = GetComponentInChildren<Animator>();
+        if (fadeImage != null)
+        {
+            fadeImage.gameObject.SetActive(false);
+            fadeImage.raycastTarget = false;
+        }
     }
 
     private void OnEnable()
     {
-        // Each time a scene loads -> fade in automatically
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -37,13 +59,51 @@ public class FadeController : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        animator.SetTrigger("FadeIn");
+        if (fadeImage.gameObject.activeSelf)
+        {
+            if (currentFade != null)
+                StopCoroutine(currentFade);
+
+            currentFade = StartCoroutine(FadeIn());
+        }
+    }
+    public IEnumerator FadeIn()
+    {
+        float t = 1f;
+        while (t > 0f)
+        {
+            t -= Time.unscaledDeltaTime / fadeTime;
+            fadeImage.color = new Color(0, 0, 0, t);
+            yield return null;
+        }
+
+        fadeImage.gameObject.SetActive(false);
+        fadeImage.raycastTarget = false;
+        currentFade = null;
     }
 
-    public void FadeOut()
+    public void FadeOutAndLoad(string sceneName)
     {
-        animator.SetTrigger("FadeOut");
+        if (currentFade != null)
+            StopCoroutine(currentFade);
+
+        fadeImage.gameObject.SetActive(true);
+        fadeImage.raycastTarget = true;
+        currentFade = StartCoroutine(FadeOut(sceneName));
+    }
+
+    public IEnumerator FadeOut(string sceneName)
+    {
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.unscaledDeltaTime / fadeTime;
+            fadeImage.color = new Color(0, 0, 0, t);
+            yield return null;
+        }
+
+        SceneManager.LoadScene(sceneName);
     }
 }

@@ -7,10 +7,7 @@ using UnityEngine.Events;
 public class EnemyBattle : MonoBehaviour
 {
     public EnemyData enemyData;
-    private float currentHP;
-    public Slider hpSlider;
-    public TMP_Text mobName;
-    public TMP_Text hpText;
+    public float currentHP;
     public UnityEvent OnTakeDamage;
     public UnityEvent OnDeath;
     public UnityEvent<float, float> OnHPChanged;
@@ -20,19 +17,10 @@ public class EnemyBattle : MonoBehaviour
     private Animator animator;
     [HideInInspector] public EnemySpawner spawner;
 
-    private void Start()
-    { 
-        isDead = false;
+    private void Awake()
+    {
         animator = GetComponent<Animator>();
         anim = GetComponent<EnemyAnimation>();
-        if (enemyData != null)
-        {
-            InitializeEnemy(enemyData);
-        }
-        else
-        {
-            Debug.LogWarning("EnemyData not assigned to " + gameObject.name);
-        }
     }
 
     public void InitializeEnemy(EnemyData data)
@@ -40,71 +28,43 @@ public class EnemyBattle : MonoBehaviour
         enemyData = Instantiate(data);
         currentHP = enemyData.baseHP;
 
-        if (hpSlider != null)
-        {
-            hpSlider.maxValue = enemyData.baseHP;
-            hpSlider.value = currentHP;
-            Debug.Log("hpSlider assigned correctly");
-        }
-        else
-        {
-            Debug.LogWarning("hpSlider is NULL for " + gameObject.name);
-        }
-        if (hpText != null)
-        {
-            hpText.text = $"{currentHP}/{enemyData.baseHP}";
-            Debug.Log("hpText assigned correctly");
-        }
-        else
-        {
-            Debug.LogWarning("hpText is NULL for " + gameObject.name);
-        }
-        if  (mobName != null)
-        {
-            mobName.text = $"{enemyData.enemyName}";
-            Debug.Log("Enemy name assigned");
-        }
-        OnHPChanged.AddListener(UpdateHPUI);
+        // Update UI
+        UIHandler.Instance.UpdateEnemyHPUI(currentHP, enemyData.baseHP);
+        UIHandler.Instance.UpdateEnemyName(enemyData.enemyName);
+
+        // Subscribe to UI update
+        OnHPChanged.AddListener(UIHandler.Instance.UpdateEnemyHPUI);
         OnHPChanged?.Invoke(currentHP, enemyData.baseHP);
-
-        Debug.Log($"Initialized Enemy: {enemyData.enemyName} | Current HP: {currentHP}/{enemyData.baseHP}");
-    }
-
-    private void UpdateHPUI(float current, float max)
-    {
-        if (hpSlider != null)
-            hpSlider.value = current;
-
-        if (hpText != null)
-            hpText.text = $"{current}/{max}";
     }
     public void TakeDamage(float amount)
     {
         if (isDead) return;
+
         currentHP -= amount;
         currentHP = Mathf.Clamp(currentHP, 0, enemyData.baseHP);
 
-        if (hpSlider != null)
-            hpSlider.value = currentHP;
         OnTakeDamage?.Invoke();
         OnHPChanged?.Invoke(currentHP, enemyData.baseHP);
+
         if (currentHP <= 0)
         {
             isDead = true;
-            Debug.Log(enemyData.enemyName + " has been defeated!");
             anim.PlayDeath();
             OnDeath?.Invoke();
 
-            // Inform spawner this enemy is gone
             if (spawner != null)
                 spawner.OnEnemyDefeated(this);
-            
+
             StartCoroutine(DestroyAfterDeath());
         }
-        anim.PlayHit();
+        else
+        {
+            anim.PlayHit();
+        }
     }
     public float GetDamage()
     {
+        AudioManager.Instance.PlaySFX(AudioManager.Instance.attackSound);
         anim.PlayAttack();
         return enemyData.baseDamage;
     }

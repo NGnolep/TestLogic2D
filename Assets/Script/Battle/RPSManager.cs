@@ -6,103 +6,52 @@ public class RPSManager : MonoBehaviour
 {
     public PlayerBattle player;
     public EnemyBattle enemy;
-    public Button[] choiceButtons;
     public float buttonCooldown = 1.5f;
-
     private bool roundActive = false;
-
-    public Image playerChoiceImage;
-    public Image enemyChoiceImage;
-
-    public Sprite rockSprite;
-    public Sprite paperSprite;
-    public Sprite scissorSprite;
     private void Start()
     {
-        SetButtonsActive(false, true);
+        UIHandler.Instance.SetButtonsActive(false, true);
     }
 
-    public void SetButtonsActive(bool state, bool dim = false)
-    {
-        foreach (Button btn in choiceButtons)
-        {
-            if (btn == null) continue;
-
-            btn.interactable = state;
-
-            ColorBlock colors = btn.colors;
-            if (dim)
-            {
-                colors.normalColor = new Color(1f, 1f, 1f, 0.5f);
-                colors.highlightedColor = new Color(1f, 1f, 1f, 0.5f);
-            }
-            else
-            {
-                colors.normalColor = Color.white;
-                colors.highlightedColor = Color.white;
-            }
-            btn.colors = colors;
-        }
-    }
     public void EnableBattleRound()
     {
         roundActive = true;
-        SetButtonsActive(true, false); 
-    }
-
-    public Sprite GetSpriteForChoice(RPSChoice choice)
-    {
-        switch (choice)
-        {
-            case RPSChoice.Rock: return rockSprite;
-            case RPSChoice.Paper: return paperSprite;
-            case RPSChoice.Scissors: return scissorSprite;
-        }
-        return null;
+        UIHandler.Instance.SetButtonsActive(true, false);
     }
     public void ResolveBattle()
     {
         if (!roundActive) return;
+        if (player == null || enemy == null) return;
+
         roundActive = false;
-        SetButtonsActive(false, true);
-        if (player == null || enemy == null)
-        {
-            Debug.LogWarning("Player or Enemy not assigned in RPSBattleManager!");
-            return;
-        }
+        UIHandler.Instance.SetButtonsActive(false, true);
 
         enemy.currentChoice = (RPSChoice)Random.Range(0, 3);
-
         RPSChoice playerChoice = player.currentChoice;
         RPSChoice enemyChoice = enemy.currentChoice;
-        if (playerChoiceImage != null)
-            playerChoiceImage.sprite = GetSpriteForChoice(playerChoice);
 
-        if (enemyChoiceImage != null)
-            enemyChoiceImage.sprite = GetSpriteForChoice(enemyChoice);
-        Debug.Log($"Player chose {playerChoice}, Enemy chose {enemyChoice}");
+        UIHandler.Instance.playerChoiceImage.sprite = UIHandler.Instance.GetSpriteForChoice(playerChoice);
+        UIHandler.Instance.enemyChoiceImage.sprite = UIHandler.Instance.GetSpriteForChoice(enemyChoice);
 
-        if (playerChoice == enemyChoice)
+        UIHandler.Instance.IncrementChoiceCounter(playerChoice);
+        
+        bool playerWins = (playerChoice == RPSChoice.Rock && enemyChoice == RPSChoice.Scissors) ||
+                          (playerChoice == RPSChoice.Paper && enemyChoice == RPSChoice.Rock) ||
+                          (playerChoice == RPSChoice.Scissors && enemyChoice == RPSChoice.Paper);
+
+        if (playerChoice != enemyChoice)
         {
-            Debug.Log("Draw! No one takes damage.");
-        }
-        else
-        {
-            bool playerWins =
-                (playerChoice == RPSChoice.Rock && enemyChoice == RPSChoice.Scissors) ||
-                (playerChoice == RPSChoice.Paper && enemyChoice == RPSChoice.Rock) ||
-                (playerChoice == RPSChoice.Scissors && enemyChoice == RPSChoice.Paper);
-
-                if (playerWins)
+            if (playerWins)
+            {
+                enemy.TakeDamage(player.GetDamage());
+            // If enemy is defeated
+                if (enemy.currentHP <= 0)
                 {
-                    Debug.Log("Player wins this round!");
-                    enemy.TakeDamage(player.GetDamage());
+                    UIHandler.Instance.IncrementEnemiesDefeated();
                 }
-                else
-                {
-                    Debug.Log("Enemy wins this round!");
-                    player.TakeDamage(enemy.GetDamage());
-                }
+            }
+            else
+                player.TakeDamage(enemy.GetDamage());
         }
         StartCoroutine(RoundCooldown());
     }
@@ -110,11 +59,10 @@ public class RPSManager : MonoBehaviour
     private IEnumerator RoundCooldown()
     {
         yield return new WaitForSeconds(buttonCooldown);
-
         if (enemy != null && enemy.gameObject.activeSelf)
         {
             roundActive = true;
-            SetButtonsActive(true, false);
+            UIHandler.Instance.SetButtonsActive(true, false);
         }
     }
 }

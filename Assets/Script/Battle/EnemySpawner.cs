@@ -9,84 +9,35 @@ public class EnemySpawner : MonoBehaviour
     public Transform spawnPoint;       
     public Transform battlePoint;
     public float moveSpeed = 3f;
-
-    private GameObject enemyPrefab;
-
-    private EnemyBattle currentEnemy;
-
     public RPSManager battleManager;
-    public TMP_Text roundText;
-    public TMP_Text scoreText;
-
-    public GameObject startPopup;         
-    public TMP_Text startPopupText;        
-    public float startPopupDuration = 1.5f;
     private int currentWave = 0;
-    private int currentScore = 0;
 
     void Start()
     {
-        UpdateRoundText();
-        UpdateScoreText();
         StartCoroutine(SpawnEnemyRoutine());
     }
 
     IEnumerator SpawnEnemyRoutine()
     {
-        EnemyData randomEnemy = enemyDatabase.GetRandomEnemy();
-        if (randomEnemy == null)
-        {
-            Debug.LogWarning("No enemies in database!");
-            yield break;
-        }
         currentWave++;
-        UpdateRoundText();
-        GameObject enemyObj = Instantiate(randomEnemy.enemyPrefab, spawnPoint.position, Quaternion.identity);
-        currentEnemy = enemyObj.GetComponent<EnemyBattle>();
+        UIHandler.Instance.SetCurrentWave(currentWave);
 
-        currentEnemy.spawner = this;
-        currentEnemy.enemyData = randomEnemy;
+        EnemyData data = enemyDatabase.GetRandomEnemy();
+        if (data == null) yield break;
 
-        Slider hpSlider = GameObject.Find("EnemyHP")?.GetComponent<Slider>();
-        TMP_Text hpText = GameObject.Find("EnemyHPText")?.GetComponent<TMP_Text>();
-        TMP_Text nameText = GameObject.Find("EnemyNameText")?.GetComponent<TMP_Text>();
+        GameObject enemyObj = Instantiate(data.enemyPrefab, spawnPoint.position, Quaternion.identity);
+        EnemyBattle enemy = enemyObj.GetComponent<EnemyBattle>();
+        enemy.spawner = this;
+        enemy.InitializeEnemy(data);
 
-        if (hpSlider != null && hpText != null)
-        {
-            currentEnemy.hpSlider = hpSlider;
-            currentEnemy.hpText = hpText;
-            currentEnemy.mobName = nameText;
-        }
-        else
-        {
-            Debug.LogWarning("Enemy UI elements not found in scene!");
-        }
+        battleManager.enemy = enemy;
 
-        if (battleManager != null)
-        {
-            battleManager.enemy = currentEnemy;
-            Debug.Log($"[EnemySpawner] Assigned new enemy ({randomEnemy.enemyName}) to BattleManager.");
-
-            battleManager.SetButtonsActive(false, true);
-        }
-
-        if (battleManager != null)
-        {
-            battleManager.enemy = currentEnemy;
-            Debug.Log($"[EnemySpawner] Assigned new enemy ({randomEnemy.enemyName}) to BattleManager.");
-        }
-
-        Debug.Log($"Spawned enemy: {randomEnemy.enemyName}");
-
+        // Move to battle point
         yield return StartCoroutine(MoveToPosition(enemyObj.transform, battlePoint.position));
 
-        Debug.Log("Enemy reached battle point — wave start!");
-        StartCoroutine(ShowStartPopup());
+        StartCoroutine(UIHandler.Instance.ShowStartPopup());
 
-        if (battleManager != null)
-        {
-            battleManager.EnableBattleRound();
-        }
+        battleManager.EnableBattleRound();
     }
 
     IEnumerator MoveToPosition(Transform enemy, Vector3 target)
@@ -101,8 +52,9 @@ public class EnemySpawner : MonoBehaviour
 
     public void OnEnemyDefeated(EnemyBattle defeatedEnemy)
     {
-        Debug.Log("Enemy defeated! Preparing next wave...");
-        AddScore(2000);
+        UIHandler.Instance.AddScore(2000);
+        UIHandler.Instance.UpdateTotalScore(UIHandler.Instance.currentScore);
+        AudioManager.Instance.PlaySFX(AudioManager.Instance.deathSound);
         StartCoroutine(NextWaveDelay(2f));
     }
 
@@ -112,45 +64,4 @@ public class EnemySpawner : MonoBehaviour
         StartCoroutine(SpawnEnemyRoutine());
     }
     
-     private void AddScore(int amount)
-    {
-        currentScore += amount;
-        UpdateScoreText();
-        SaveBestScore();
-    }
-
-    private void SaveBestScore()
-    {
-        int best = PlayerPrefs.GetInt("BestScore", 0);
-
-        if (currentScore > best)
-        {
-            PlayerPrefs.SetInt("BestScore", currentScore);
-            PlayerPrefs.Save();
-        }
-    }
-    private void UpdateRoundText()
-    {
-        if (roundText != null)
-            roundText.text = $"Round: {currentWave}";
-    }
-
-    private void UpdateScoreText()
-    {
-        if (scoreText != null)
-            scoreText.text = $"Score: {currentScore}";
-    }
-
-    private IEnumerator ShowStartPopup()
-    {
-        if (startPopup == null || startPopupText == null)
-            yield break;
-
-        startPopupText.text = $"START!";
-        startPopup.SetActive(true);
-
-        yield return new WaitForSeconds(startPopupDuration);
-
-        startPopup.SetActive(false);
-    }
 }

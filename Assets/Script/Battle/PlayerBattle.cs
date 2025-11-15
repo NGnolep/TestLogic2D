@@ -8,11 +8,7 @@ using UnityEngine.Events;
 public class PlayerBattle : MonoBehaviour
 {
     public PlayerData playerData;
-    private float currentHP;
-
-    public Slider hpSlider;
-    public TMP_Text hpText;
-
+    public float currentHP;
     public UnityEvent OnTakeDamage;
     public UnityEvent OnDeath;
     public UnityEvent<float, float> OnHPChanged;
@@ -20,28 +16,20 @@ public class PlayerBattle : MonoBehaviour
     private PlayerAnimation anim;
     private bool isDead = false;
     private Animator animator;
-    private void Start()
+    private void Awake()
     {
-        isDead = false;
         animator = GetComponent<Animator>();
         anim = GetComponent<PlayerAnimation>();
         currentHP = playerData.maxHP;
-        OnHPChanged.AddListener(UpdateHPUI);
+
+        OnHPChanged.AddListener(UIHandler.Instance.UpdatePlayerHPUI);
         OnHPChanged?.Invoke(currentHP, playerData.maxHP);
-    }
-
-    private void UpdateHPUI(float current, float max)
-    {
-        if (hpSlider != null)
-            hpSlider.value = current;
-
-        if (hpText != null)
-            hpText.text = $"{current}/{max}";
     }
 
     public void TakeDamage(float amount)
     {
         if (isDead) return;
+
         currentHP -= amount;
         currentHP = Mathf.Clamp(currentHP, 0, playerData.maxHP);
 
@@ -53,21 +41,19 @@ public class PlayerBattle : MonoBehaviour
             isDead = true;
             anim.PlayDeath();
             OnDeath?.Invoke();
-            Debug.Log($"player has been defeated!");
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.deathSound);
+            UIHandler.Instance.ShowGameOverPanel();
             StartCoroutine(DestroyAfterDeath());
         }
-        anim.PlayHit();
-    }
-
-    private IEnumerator DestroyAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-
-        Destroy(gameObject); 
+        else
+        {
+            anim.PlayHit();
+        }
     }
     public float GetDamage()
     {
         anim.PlayAttack();
+        AudioManager.Instance.PlaySFX(AudioManager.Instance.attackSound);
         return playerData.baseDamage;
     }
 

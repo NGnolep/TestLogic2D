@@ -6,49 +6,49 @@ using UnityEngine.UI;
 public class FadeController : MonoBehaviour
 {
     public static FadeController Instance;
-    public Image fadeImage;
+    private Image fadeImage;
     public float fadeTime = 1f;
-
     private Coroutine currentFade;
     private void Awake()
     {
-        string scene = SceneManager.GetActiveScene().name;
-
-       if (scene == "MainMenu")
+        if (Instance != null && Instance != this)
         {
-            if (Instance != null && Instance != this)
-            {
-                try
-                {
-                    SceneManager.sceneLoaded -= Instance.OnSceneLoaded;
-                }
-                catch { /* ignore if already unsubscribed */ }
-
-                Destroy(Instance.gameObject);
-            }
-            Instance = this;
-        }
-        else
-        {
-            if (Instance == null)
-            {
-                Instance = this;
-                DontDestroyOnLoad(gameObject);
-            }
-            else
-            {
-                Destroy(gameObject);
-                return;
-            }
+            Destroy(gameObject);
+            return;
         }
 
-        if (fadeImage != null)
-        {
-            fadeImage.gameObject.SetActive(false);
-            fadeImage.raycastTarget = false;
-        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        CreateFadeCanvas();
     }
 
+    void CreateFadeCanvas()
+    {
+        GameObject canvasGO = new GameObject("FadeCanvas");
+        canvasGO.transform.SetParent(transform);
+
+        Canvas canvas = canvasGO.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 9999; // always on top
+
+        CanvasGroup cg = canvasGO.AddComponent<CanvasGroup>();
+        cg.interactable = false; // fade shouldn't block by default
+
+        // Create fade image
+        GameObject imgGO = new GameObject("FadeImage");
+        imgGO.transform.SetParent(canvasGO.transform);
+        fadeImage = imgGO.AddComponent<Image>();
+        fadeImage.color = new Color(0, 0, 0, 1f);
+
+        RectTransform rect = imgGO.GetComponent<RectTransform>();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+
+        fadeImage.raycastTarget = true;
+    }
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -61,42 +61,45 @@ public class FadeController : MonoBehaviour
 
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (fadeImage.gameObject.activeSelf)
-        {
-            if (currentFade != null)
-                StopCoroutine(currentFade);
+        if (currentFade != null)
+            StopCoroutine(currentFade);
 
-            currentFade = StartCoroutine(FadeIn());
-        }
+        currentFade = StartCoroutine(FadeIn());
     }
     public IEnumerator FadeIn()
     {
         float t = 1f;
-        while (t > 0f)
+
+        fadeImage.gameObject.SetActive(true);
+        fadeImage.raycastTarget = true;
+
+        while (t > 0)
         {
             t -= Time.unscaledDeltaTime / fadeTime;
             fadeImage.color = new Color(0, 0, 0, t);
             yield return null;
         }
 
-        fadeImage.gameObject.SetActive(false);
+        fadeImage.color = new Color(0, 0, 0, 0);
         fadeImage.raycastTarget = false;
         currentFade = null;
     }
 
-    public void FadeOutAndLoad(string sceneName)
+    public void FadeOutAndLoad(string scene)
     {
         if (currentFade != null)
             StopCoroutine(currentFade);
 
-        fadeImage.gameObject.SetActive(true);
-        fadeImage.raycastTarget = true;
-        currentFade = StartCoroutine(FadeOut(sceneName));
+        currentFade = StartCoroutine(FadeOut(scene));
     }
 
-    public IEnumerator FadeOut(string sceneName)
+    public IEnumerator FadeOut(string scene)
     {
         float t = 0f;
+
+        fadeImage.gameObject.SetActive(true);
+        fadeImage.raycastTarget = true;
+
         while (t < 1f)
         {
             t += Time.unscaledDeltaTime / fadeTime;
@@ -104,6 +107,8 @@ public class FadeController : MonoBehaviour
             yield return null;
         }
 
-        SceneManager.LoadScene(sceneName);
+        fadeImage.color = new Color(0, 0, 0, 1f);
+
+        SceneManager.LoadScene(scene);
     }
 }
